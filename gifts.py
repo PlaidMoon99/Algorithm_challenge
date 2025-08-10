@@ -33,6 +33,3 @@ def solution(friends, gifts):
                 # 같으면 아무도 안 받음
 
     return max(next_month)
-
-if __name__ == "__main__":
-        solution()
