@@ -5,23 +5,23 @@ def solution(storage, requests):
     m = len(storage[0])
     grid = [list(row) for row in storage]
 
-    # 방향 (상, 하, 좌, 우)
     dr = [-1, 1, 0, 0]
     dc = [0, 0, -1, 1]
 
-    def bfs_find_accessible(target):
+    def bfs_accessible(target):
         visited = [[False]*m for _ in range(n)]
         q = deque()
 
-        # 외부 공간 탐색을 위해 테두리에서 빈 공간 탐색
+        # 외부 공기 시작점: 바깥 가상 좌표에서 탐색
         for r in range(n):
-            for c in range(m):
-                # 외곽 + 빈 칸
-                if (r == 0 or r == n-1 or c == 0 or c == m-1) and grid[r][c] == '.':
-                    q.append((r, c))
-                    visited[r][c] = True
+            q.append((-1, r))  # 위쪽 외부
+            q.append((n, r))   # 아래쪽 외부
+        for c in range(m):
+            q.append((c, -1))  # 왼쪽 외부
+            q.append((c, m))   # 오른쪽 외부
 
-        # 외부 빈 공간 확장
+        accessible = set()
+
         while q:
             r, c = q.popleft()
             for i in range(4):
@@ -30,34 +30,21 @@ def solution(storage, requests):
                     if grid[nr][nc] == '.':
                         visited[nr][nc] = True
                         q.append((nr, nc))
-        
-        # 접근 가능한 컨테이너 찾기
-        accessible = []
-        for r in range(n):
-            for c in range(m):
-                if grid[r][c] == target:
-                    for i in range(4):
-                        nr, nc = r + dr[i], c + dc[i]
-                        if 0 <= nr < n and 0 <= nc < m and visited[nr][nc]:
-                            accessible.append((r, c))
-                            break
+                    elif grid[nr][nc] == target:
+                        accessible.add((nr, nc))
         return accessible
 
     for req in requests:
         target = req[0]
-        if len(req) == 2:
-            # 크레인: 해당 알파벳 전부 제거
+        if len(req) == 2:  # 크레인
             for r in range(n):
                 for c in range(m):
                     if grid[r][c] == target:
                         grid[r][c] = '.'
-        else:
-            # 지게차: 접근 가능한 해당 알파벳만 제거
-            accessible = bfs_find_accessible(target)
-            for r, c in accessible:
+        else:  # 지게차
+            for r, c in bfs_accessible(target):
                 grid[r][c] = '.'
 
-    # 남은 컨테이너 수 계산
     return sum(1 for r in range(n) for c in range(m) if grid[r][c] != '.')
 
 
